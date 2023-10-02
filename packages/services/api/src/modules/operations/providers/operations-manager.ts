@@ -285,72 +285,67 @@ export class OperationsManager {
       field,
       argument,
       period,
-      count: totalField,
-      percentage: total === 0 ? 0 : (totalField / total) * 100,
+      count: totalField.count,
+      percentage: total === 0 ? 0 : (totalField.count / total) * 100,
     };
   }
 
-  async readFieldListStats({
-    fields,
-    period,
-    organization,
-    project,
-    target,
-    unsafe__itIsMeInspector,
-    excludedClients,
-  }: {
-    fields: ReadonlyArray<{
-      type: string;
-      field?: string | null;
-      argument?: string | null;
-    }>;
-    period: DateRange;
-    /**
-     * Skips the access check.
-     * A token created for one target can't access data from the other targets.
-     * This is a workaround for the inspector only.
-     * TODO: let's think how to solve it well, soon.
-     */
-    unsafe__itIsMeInspector?: boolean;
-    excludedClients?: readonly string[];
-  } & Listify<TargetSelector, 'target'>) {
+  async readFieldListStats(
+    input: {
+      fields: ReadonlyArray<{
+        type: string;
+        field?: string | null;
+        argument?: string | null;
+      }>;
+      period: DateRange;
+      /**
+       * Skips the access check.
+       * A token created for one target can't access data from the other targets.
+       * This is a workaround for the inspector only.
+       * TODO: let's think how to solve it well, soon.
+       */
+      unsafe__itIsMeInspector?: boolean;
+      excludedClients?: readonly string[];
+    } & Listify<TargetSelector, 'target'>,
+  ) {
     this.logger.info(
       'Counting fields (period=%o, target=%s, excludedClients=%s)',
-      period,
-      target,
-      excludedClients?.join(', ') ?? 'none',
+      input.period,
+      input.target,
+      input.excludedClients?.join(', ') ?? 'none',
     );
 
-    if (!unsafe__itIsMeInspector) {
+    if (!input.unsafe__itIsMeInspector) {
       await this.authManager.ensureTargetAccess({
-        organization,
-        project,
-        target,
+        organization: input.organization,
+        project: input.project,
+        target: input.target,
         scope: TargetAccessScope.REGISTRY_READ,
       });
     }
 
-    const [totalFields, total] = await Promise.all([
+    const [fields, globalCount] = await Promise.all([
       this.reader.countFields({
-        fields,
-        target,
-        period,
-        excludedClients,
+        fields: input.fields,
+        target: input.target,
+        period: input.period,
+        excludedClients: input.excludedClients,
       }),
-      this.reader.countOperationsWithoutDetails({ target, period }),
+      this.reader.countOperationsWithoutDetails({ target: input.target, period: input.period }),
     ]);
 
-    return Object.keys(totalFields).map(id => {
-      const [type, field, argument] = id.split('.');
-      const totalField = totalFields[id] ?? 0;
+    return Object.keys(fields).map(id => {
+      const [typeName, fieldName, argumentName] = id.split('.');
+      const schemaCoordinateData = fields[id] ?? 0;
 
       return {
-        type,
-        field,
-        argument,
-        period,
-        count: totalField,
-        percentage: total === 0 ? 0 : (totalField / total) * 100,
+        type: typeName,
+        field: fieldName,
+        argument: argumentName,
+        period: input.period,
+        count: schemaCoordinateData.count,
+        percentage: globalCount === 0 ? 0 : (schemaCoordinateData.count / globalCount) * 100,
+        affected: schemaCoordinateData.hashesPerTarget,
       };
     });
   }

@@ -246,7 +246,7 @@ export class OperationsReader {
       excludedClients?: readonly string[];
     },
     span?: Span,
-  ): Promise<Record<string, number>> {
+  ) {
     const coordinates = fields.map(selector => this.makeId(selector));
     const conditions = [sql`(coordinate IN (${sql.array(coordinates, 'String')}))`];
 
@@ -254,6 +254,10 @@ export class OperationsReader {
       // Eliminate coordinates fetched by excluded clients.
       // We can connect a coordinate to a client by using the hash column.
       // The hash column is basically a unique identifier of a GraphQL operation.
+
+      // TODO: make sure it's correct to eliminate coordinates by hash.
+      // What if operation (hash) is used by other client_names?
+      // If excluded clients uses 1234abcd hash, but other clients also use it, we will exclude it from the result...
       conditions.push(sql`
         hash NOT IN (
           SELECT hash FROM clients_daily ${this.createFilter({
@@ -267,11 +271,15 @@ export class OperationsReader {
 
     const res = await this.clickHouse.query<{
       total: string;
+      hashes: string[];
+      target: string;
       coordinate: string;
     }>({
       query: sql`
             SELECT
               coordinate,
+              target,
+              groupUniqArray(hash) as hashes,
               sum(total) as total
             FROM coordinates_daily
             ${this.createFilter({
@@ -280,23 +288,37 @@ export class OperationsReader {
               operations,
               extra: conditions,
             })}
-            GROUP BY coordinate
+            GROUP BY coordinate, target
           `,
       queryId: 'count_fields_v2',
       timeout: 30_000,
       span,
     });
 
-    const stats: Record<string, number> = {};
+    const stats: Record<
+      string /* coordinate */,
+      {
+        count: number;
+        hashesPerTarget: Record<string /* target */, string[] /* hashes */>;
+      }
+    > = {};
     for (const row of res.data) {
-      stats[row.coordinate] = ensureNumber(row.total);
+      if (!stats[row.coordinate]) {
+        stats[row.coordinate] = {
+          count: 0,
+          hashesPerTarget: {},
+        };
+      }
+      stats[row.coordinate].count += ensureNumber(row.total);
+      stats[row.coordinate].hashesPerTarget[row.target] = row.hashes;
     }
 
+    // Fill in missing coordinates with 0.
     for (const selector of fields) {
       const key = this.makeId(selector);
 
-      if (typeof stats[key] !== 'number') {
-        stats[key] = 0;
+      if (typeof stats[key]?.count !== 'number') {
+        stats[key].count = 0;
       }
     }
 
