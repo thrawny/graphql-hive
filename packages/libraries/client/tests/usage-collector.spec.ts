@@ -12,6 +12,10 @@ const schema = buildSchema(/* GraphQL */ `
     deleteProject(selector: ProjectSelectorInput!): DeleteProjectPayload!
   }
 
+  type Subscription {
+    onDeletedProject: Project
+  }
+
   input ProjectSelectorInput {
     organization: ID!
     project: ID!
@@ -65,7 +69,7 @@ const schema = buildSchema(/* GraphQL */ `
   }
 `);
 
-const op = parse(/* GraphQL */ `
+const mutation = parse(/* GraphQL */ `
   mutation deleteProject($selector: ProjectSelectorInput!) {
     deleteProject(selector: $selector) {
       selector {
@@ -86,12 +90,27 @@ const op = parse(/* GraphQL */ `
   }
 `);
 
+const subscription = parse(/* GraphQL */ `
+  subscription onDeletedProject {
+    onDeletedProject {
+      ...ProjectFields
+    }
+  }
+
+  fragment ProjectFields on Project {
+    id
+    cleanId
+    name
+    type
+  }
+`);
+
 test('collect fields', async () => {
   const collect = createCollector({
     schema,
     max: 1,
   });
-  const info = collect(op, {}).value;
+  const info = collect(mutation, {}).value;
 
   expect(info.fields).toContain(`Mutation.deleteProject`);
   expect(info.fields).toContain(`Project.id`);
@@ -102,7 +121,7 @@ test('collect input object types', async () => {
     schema,
     max: 1,
   });
-  const info = collect(op, {}).value;
+  const info = collect(mutation, {}).value;
 
   expect(info.fields).toContain(`ProjectSelectorInput.organization`);
   expect(info.fields).toContain(`ProjectSelectorInput.project`);
@@ -310,6 +329,17 @@ test('collect all input fields when `processVariables` has not been passed and i
   expect(info.fields).toContain(`FilterInput.type`);
   expect(info.fields).toContain(`PaginationInput.limit`);
   expect(info.fields).toContain(`PaginationInput.offset`);
+});
+
+test('collect fields from Subscription', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(subscription, {}).value;
+
+  expect(info.fields).toContain(`Subscription.onDeletedProject`);
+  expect(info.fields).toContain(`Project.id`);
 });
 
 test('should get a cache hit when document is the same but variables are different (by default)', async () => {
