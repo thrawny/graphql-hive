@@ -108,7 +108,7 @@ test('collect input object types', async () => {
   expect(info.fields).toContain(`ProjectSelectorInput.project`);
 });
 
-test('collect enums and scalars as inputs', async () => {
+test('collect enums and scalars from variables', async () => {
   const collect = createCollector({
     schema,
     max: 1,
@@ -174,6 +174,51 @@ test('collect enum values from arguments', async () => {
   expect(info.fields).not.toContain(`ProjectType.STITCHING`);
   expect(info.fields).not.toContain(`ProjectType.SINGLE`);
   expect(info.fields).not.toContain(`ProjectType.CUSTOM`);
+});
+
+test('collect enums from field types', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      query getProjects {
+        projects {
+          id
+          type
+        }
+      }
+    `),
+    {},
+  ).value;
+
+  expect(info.fields).toContain(`ProjectType.FEDERATION`);
+  expect(info.fields).toContain(`ProjectType.STITCHING`);
+  expect(info.fields).toContain(`ProjectType.SINGLE`);
+  expect(info.fields).toContain(`ProjectType.CUSTOM`);
+});
+
+test('collect enums from input field types', async () => {
+  const collect = createCollector({
+    schema,
+    max: 1,
+  });
+  const info = collect(
+    parse(/* GraphQL */ `
+      query getProjects($filter: FilterInput!) {
+        projects(filter: $filter) {
+          id
+        }
+      }
+    `),
+    {},
+  ).value;
+
+  expect(info.fields).toContain(`ProjectType.FEDERATION`);
+  expect(info.fields).toContain(`ProjectType.STITCHING`);
+  expect(info.fields).toContain(`ProjectType.SINGLE`);
+  expect(info.fields).toContain(`ProjectType.CUSTOM`);
 });
 
 test('collect arguments', async () => {

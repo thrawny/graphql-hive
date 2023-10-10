@@ -5,8 +5,10 @@ import {
   getNamedType,
   GraphQLInputType,
   GraphQLInterfaceType,
+  GraphQLNamedOutputType,
   GraphQLNamedType,
   GraphQLObjectType,
+  GraphQLOutputType,
   GraphQLSchema,
   GraphQLType,
   GraphQLUnionType,
@@ -380,6 +382,14 @@ export function createCollector({
           }
 
           markAsUsed(makeId(parent.name, field.name));
+
+          if (!node.selectionSet) {
+            const fieldType = resolveOutputType(field.type);
+
+            if (isEnumType(fieldType)) {
+              markEntireTypeAsUsed(fieldType);
+            }
+          }
         },
         VariableDefinition(node) {
           const inputType = typeInfo.getInputType();
@@ -516,6 +526,10 @@ export function createCollector({
 
 function resolveTypeName(inputType: GraphQLType): string {
   return getNamedType(inputType).name;
+}
+
+function resolveOutputType(outputType: GraphQLOutputType): GraphQLNamedOutputType {
+  return getNamedType(outputType);
 }
 
 function printPath(
