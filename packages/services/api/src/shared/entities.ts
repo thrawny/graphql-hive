@@ -93,6 +93,7 @@ export interface SchemaVersion {
     repository: string;
     sha: string;
   };
+  tags: null | Array<string>;
 }
 
 export interface SchemaObject {
@@ -363,6 +364,13 @@ export interface ComposeAndValidateResult {
   supergraph: string | null;
   errors: CompositionFailureError[];
   sdl: string | null;
+  contracts: Array<{
+    id: string;
+    errors: Array<CompositionFailureError>;
+    sdl: string | null;
+    supergraph: string | null;
+  }> | null;
+  tags: Array<string> | null;
 }
 
 export interface Orchestrator {

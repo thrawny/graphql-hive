@@ -416,12 +416,14 @@ export interface Storage {
         | {
             compositeSchemaSDL: null;
             supergraphSDL: null;
+            tags: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
+            tags: null | Array<string>;
           }
       ),
   ): Promise<DeletedCompositeSchema & { versionId: string }>;
@@ -450,11 +452,13 @@ export interface Storage {
             compositeSchemaSDL: null;
             supergraphSDL: null;
             schemaCompositionErrors: Array<SchemaCompositionError>;
+            tags: null;
           }
         | {
             compositeSchemaSDL: string;
             supergraphSDL: string | null;
             schemaCompositionErrors: null;
+            tags: null | Array<string>;
           }
       ),
   ): Promise<SchemaVersion | never>;

@@ -976,6 +976,7 @@ export function fetchLatestValidSchema(token: string) {
               deletedService
             }
           }
+          tags
           schemas {
             nodes {
               ... on SingleSchema {
