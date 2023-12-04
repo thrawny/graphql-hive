@@ -1,4 +1,5 @@
 import { Injectable } from 'graphql-modules';
+import type { DatabasePool } from 'slonik';
 import type { PolicyConfigurationObject } from '@hive/policy';
 import type {
   SchemaChangeType,
@@ -61,6 +62,7 @@ export interface TargetSelector extends ProjectSelector {
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export interface Storage {
+  pool: DatabasePool;
   destroy(): Promise<void>;
   isReady(): Promise<boolean>;
   ensureUserExists(_: {

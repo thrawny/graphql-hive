@@ -24,6 +24,8 @@ import type {
 } from './entities';
 import type { PromiseOrValue } from './helpers';
 
+export type { Contract } from '../modules/schema/providers/contracts';
+
 export interface SchemaVersion extends SchemaVersionEntity {
   project: string;
   target: string;
