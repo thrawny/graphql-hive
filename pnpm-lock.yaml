@@ -1698,8 +1698,8 @@ importers:
         specifier: 2.0.0
         version: 2.0.0
       supertokens-auth-react:
-        specifier: 0.35.6
-        version: 0.35.6(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0)
+        specifier: 0.36.1
+        version: 0.36.1(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0)
       supertokens-js-override:
         specifier: 0.0.4
         version: 0.0.4
@@ -30885,8 +30885,8 @@ packages:
       ts-interface-checker: 0.1.13
     dev: true
 
-  /supertokens-auth-react@0.35.6(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0):
-    resolution: {integrity: sha512-Bt+rYunzqP6g331Ks5Q66obiIU/t2k6siG6dtpJNY2DZqAnjgJlDr8S/UAU8I72f4qWwlYv8FKUTa8+O/0z3zA==}
+  /supertokens-auth-react@0.36.1(react-dom@18.2.0)(react@18.2.0)(supertokens-web-js@0.8.0):
+    resolution: {integrity: sha512-ZVN4GOFOm52B4RIO1Hn+hs9AwANIa9+edx8T34pDhjkeDlL/yn+a2FS4bOQroLjnvxJ3qhn7Uv5lQ9KlAMiQKw==}
     engines: {node: '>=16.0.0', npm: '>=8'}
     peerDependencies:
       react: '>=16.8.0'
