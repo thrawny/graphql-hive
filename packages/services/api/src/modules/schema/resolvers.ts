@@ -540,6 +540,7 @@ export const resolvers: SchemaModule.Resolvers = {
                   project,
                   organization,
                 }),
+                contracts: null,
               },
             ),
           );
@@ -609,6 +610,7 @@ export const resolvers: SchemaModule.Resolvers = {
                     project,
                     organization,
                   }),
+                  contracts: null,
                 },
               ),
             )
@@ -622,6 +624,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 project,
                 organization,
               }),
+              contracts: null,
             },
           ),
           organization.featureFlags.compareToPreviousComposableVersion === true
@@ -924,6 +927,7 @@ export const resolvers: SchemaModule.Resolvers = {
             project,
             organization,
           }),
+          contracts: null,
         },
       );
 
@@ -973,6 +977,7 @@ export const resolvers: SchemaModule.Resolvers = {
               project,
               organization,
             }),
+            contracts: null,
           },
         )
         .then(r => r.supergraph);
@@ -1020,6 +1025,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 project,
                 organization,
               }),
+              contracts: null,
             },
           ),
         )
@@ -1068,6 +1074,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 project,
                 organization,
               }),
+              contracts: null,
             },
           );
 
@@ -1107,6 +1114,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 project,
                 organization,
               }),
+              contracts: null,
             },
           ),
         );
@@ -1167,6 +1175,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 project,
                 organization,
               }),
+              contracts: null,
             },
           );
 
@@ -1204,6 +1213,7 @@ export const resolvers: SchemaModule.Resolvers = {
                 project,
                 organization,
               }),
+              contracts: null,
             },
           ),
         );

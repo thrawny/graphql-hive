@@ -84,6 +84,7 @@ export const resolvers: LabModule.Resolvers = {
                 featureFlags,
               },
             }),
+            contracts: null,
           },
         ),
       );

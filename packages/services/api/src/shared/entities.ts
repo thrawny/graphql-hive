@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { DocumentNode, GraphQLError, print, SourceLocation } from 'graphql';
 import { z } from 'zod';
 import type { AvailableRulesResponse, PolicyConfigurationObject } from '@hive/policy';
-import type { CompositionFailureError } from '@hive/schema';
+import type { CompositionFailureError, ContractsInputType } from '@hive/schema';
 import type { schema_policy_resource, SchemaCompositionError } from '@hive/storage';
 import type {
   AlertChannelType,
@@ -379,6 +379,7 @@ export interface Orchestrator {
     config: {
       external: Project['externalComposition'] | null;
       native: boolean;
+      contracts: ContractsInputType | null;
     },
   ): Promise<ComposeAndValidateResult>;
 }

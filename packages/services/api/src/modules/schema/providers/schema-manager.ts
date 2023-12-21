@@ -423,6 +423,7 @@ export class SchemaManager {
             project,
             organization,
           }),
+          contracts: null,
         },
       );
 
@@ -984,6 +985,7 @@ export class SchemaManager {
           {
             native: true,
             external: null,
+            contracts: null,
           },
         );
 
