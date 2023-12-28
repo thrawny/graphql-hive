@@ -2389,6 +2389,22 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           });
         }
 
+        for (const contract of args.contracts ?? []) {
+          const schemaVersionContractId = await insertSchemaVersionContract(trx, {
+            schemaVersionId: newVersion.id,
+            lastSchemaVersionContractId: contract.lastContractVersionId,
+            contractId: contract.contractId,
+            contractName: contract.contractName,
+            schemaCompositionErrors: contract.schemaCompositionErrors,
+            compositeSchemaSDL: contract.compositeSchemaSDL,
+            supergraphSDL: contract.supergraphSDL,
+          });
+          await insertSchemaVersionContractChanges(trx, {
+            schemaVersionContractId,
+            changes: contract.changes,
+          });
+        }
+
         await args.actionFn();
 
         return {
@@ -2477,7 +2493,7 @@ export async function createStorage(connection: string, maximumPoolSize: number)
           });
           await insertSchemaVersionContractChanges(trx, {
             schemaVersionContractId,
-            changes: input.changes,
+            changes: contract.changes,
           });
         }
 
@@ -4507,11 +4523,11 @@ const DocumentCollectionDocumentModel = zod.object({
 async function insertSchemaVersionContractChanges(
   trx: DatabaseTransactionConnection,
   args: {
-    changes: Array<SchemaChangeType>;
+    changes: Array<SchemaChangeType> | null;
     schemaVersionContractId: string;
   },
 ) {
-  if (args.changes.length === 0) {
+  if (!args.changes?.length) {
     return;
   }
 
