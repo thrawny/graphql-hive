@@ -500,6 +500,7 @@ export class SchemaPublisher {
         contracts:
           checkResult.state.contracts?.map(contract => ({
             contractId: contract.contractId,
+            contractName: contract.contractName,
             isSuccess: contract.isSuccessful,
             compositeSchemaSdl: contract.composition.compositeSchemaSDL,
             compositeSchemaSdlHash: contract.composition.compositeSchemaSDL
@@ -590,6 +591,7 @@ export class SchemaPublisher {
         contracts:
           checkResult.state?.contracts?.map(contract => ({
             contractId: contract.contractId,
+            contractName: contract.contractName,
             isSuccess: contract.isSuccessful,
             compositeSchemaSdl: contract.composition.compositeSchemaSDL,
             compositeSchemaSdlHash: contract.composition.compositeSchemaSDL
@@ -679,7 +681,7 @@ export class SchemaPublisher {
         ...(checkResult.state.composition.errors ?? []),
         ...(checkResult.state.contracts?.flatMap(contract => [
           ...(contract.composition.errors?.map(error => ({
-            message: `[${contract.contractId}] ${error.message}`,
+            message: `[${contract.contractName}] ${error.message}`,
             source: error.source,
           })) ?? []),
         ]) ?? []),
@@ -1161,6 +1163,21 @@ export class SchemaPublisher {
 
     this.logger.debug(`Found ${latestVersion?.schemas.length ?? 0} most recent schemas`);
 
+    const contracts =
+      project.type === ProjectType.FEDERATION
+        ? await this.contracts.loadContractsWithLatestValidContractVersionsByTargetId({
+            targetId: target.id,
+          })
+        : null;
+
+    const contractIdToLatestValidContractVersionId = new Map<string, string | null>();
+    for (const contract of contracts ?? []) {
+      contractIdToLatestValidContractVersionId.set(
+        contract.contract.id,
+        contract.latestValidVersion?.id ?? null,
+      );
+    }
+
     let publishResult: SchemaPublishResult;
 
     switch (project.type) {
@@ -1220,6 +1237,7 @@ export class SchemaPublisher {
           project,
           target,
           baseSchema,
+          contracts,
         });
         break;
       default: {
@@ -1368,6 +1386,7 @@ export class SchemaPublisher {
     const supergraph = publishResult.state.supergraph ?? null;
 
     this.logger.debug(`Assigning ${schemaLogIds.length} schemas to new version`);
+
     const schemaVersion = await this.schemaManager.createVersion({
       valid: composable,
       organization: organizationId,
@@ -1402,6 +1421,17 @@ export class SchemaPublisher {
             supergraphSDL: supergraph,
             schemaCompositionErrors: null,
             tags: publishResult.state?.tags ?? null,
+            contracts:
+              publishResult.state.contracts?.map(contract => ({
+                contractId: contract.contractId,
+                contractName: contract.contractName,
+                lastContractVersionId:
+                  contractIdToLatestValidContractVersionId.get(contract.contractId) ?? null,
+                compositeSchemaSDL: contract.fullSchemaSdl,
+                supergraphSDL: contract.supergraph,
+                schemaCompositionErrors: contract.compositionErrors,
+                changes: contract.changes,
+              })) ?? null,
           }
         : {
             compositeSchemaSDL: null,
@@ -1411,6 +1441,7 @@ export class SchemaPublisher {
               "Can't be null",
             ),
             tags: null,
+            contracts: null,
           }),
     });
 

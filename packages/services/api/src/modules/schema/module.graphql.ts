@@ -984,7 +984,7 @@ export default gql`
 
   input CreateContractInput {
     targetId: ID!
-    userSpecifiedContractId: String!
+    contractName: String!
     includeTags: [String!]
     excludeTags: [String!]
     removeUnreachableTypesFromPublicApiSchema: Boolean!
@@ -1006,7 +1006,7 @@ export default gql`
 
   type CreateContractInputErrors {
     targetId: String
-    userSpecifiedContractId: String
+    contractName: String
     includeTags: String
     excludeTags: String
   }
@@ -1014,7 +1014,7 @@ export default gql`
   type Contract {
     id: ID!
     target: Target!
-    userSpecifiedContractId: String!
+    contractName: String!
     includeTags: [String!]
     excludeTags: [String!]
     removeUnreachableTypesFromPublicApiSchema: Boolean!
